@@ -1,29 +1,19 @@
-# Irvin Thevaranjan — Portfolio V7.3 launch candidate
+# AboutIrvin V8 — Five-page portfolio (review candidate)
 
-## Scope
+This package is **not yet deployed**. V7.3 remains the live rollback point.
 
-Static HTML/CSS/JS site, interactive journey, decision simulator, GRC philosophy, original art gallery, résumé PDF. Runs on GitHub Pages or any static host; no build step, API, analytics, tracking or Vercel dependency.
+## Pages
+- `index.html` — executive landing page
+- `experience.html` — professional experience, leadership, and operating philosophy
+- `work.html` — flagship case studies, other work, Decision Engine
+- `journey.html` — original interactive 19-milestone journey
+- `beyond.html` — writing, podcasts, and original artwork gallery
 
-## Preview
+## Run
+From the directory: `python3 -m http.server 8000`; open `http://localhost:8000`. Keep the `assets` directory and résumé alongside the HTML pages.
 
-Serve the folder using `python3 -m http.server 8000`, then open `http://localhost:8000/`. Do **not** open a detached `index.html` without its `assets` folder. The previous V6.1 issue resulted from missing companion assets.
+## Public claim boundaries
+Case studies are explicitly independent/illustrative. Neither AI approval nor cost-savings demonstrations should be described as deployed employer systems or verified realized benefits. External articles and chronology require final owner review.
 
-## GitHub Pages deployment (not yet performed)
-
-1. Create a dedicated public GitHub repository for the professional portfolio, after reviewing all copy and assets.
-2. Upload these files at the repository root, including `assets/`, `.nojekyll`, `index.html`, `journey.html`, `robots.txt`, and the PDF.
-3. Enable Pages for the repository's chosen branch and root path.
-4. Confirm published links, social previews, navigation, mobile interaction, and performance at the final URL.
-5. Configure any custom domain **after** deciding which domain fits your professional identity. Add a final absolute canonical URL, sitemap, and `og:image` then.
-
-## Public-content boundaries
-
-- All illustrations used in personal milestones are artwork, not photographs of the events.
-- Decision Engine and AI-SDLC examples are illustrative, not employer production systems.
-- Financial outcomes are not presented as verified savings.
-- Source evidence highlights unresolved Capital One chronology and KPMG title timing; detailed dates remain absent.
-- This site intentionally excludes email and phone number. PDF has LinkedIn and public-project references.
-
-## QA
-
-See `LAUNCH_REVIEW.md` for current tested results and remaining launch blockers. All changes are local only; no publication or repository mutation.
+## Deployment
+Use a new branch or a draft PR in `irvinthev/AboutIrvin` for review; do not overwrite live `main` until approved. GitHub Pages uses `/AboutIrvin/` base URL, while relative links continue to work. Custom domain not configured.
