@@ -1,0 +1,157 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="An interactive personal journey: places, people, career, and building."><title>My Journey — Irvin Thevaranjan</title><style>*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:#102b29;color:#f2f2e9;font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif}a{color:#e4ac8a}.back{display:inline-block;padding:15px 24px;background:#102b29;color:#bfd8cb;font-size:.85rem;text-decoration:none}</style><style>
+/* Journey explorer — isolated design tokens */
+.journey-experience{background:#102b29;color:#e8f3ed;padding:clamp(64px,8vw,112px) 0;overflow:hidden;position:relative}
+.journey-experience:before{content:"";pointer-events:none;position:absolute;inset:0;background:radial-gradient(ellipse at 60% 25%,rgba(112,180,147,.13),transparent 55%)}
+.journey-wrap{position:relative;max-width:1180px;margin:auto;padding:0 24px}
+.journey-heading{display:grid;grid-template-columns:1.2fr 1fr;gap:30px;align-items:end;margin-bottom:32px}
+.journey-heading h2{font-size:clamp(3rem,6vw,5.9rem);letter-spacing:-.065em;line-height:1.02;margin:12px 0 0;color:#f2eee5}
+.journey-heading h2 em{font-family:Georgia,serif;font-weight:400;color:#daa080}
+.journey-heading p{color:#b4c9c0;font-size:1.05rem;line-height:1.7;max-width:450px;margin:0 0 5px}
+.journey-kicker{font-size:.73rem;letter-spacing:.2em;text-transform:uppercase;color:#e8ac88;font-weight:700}
+.journey-explorer{border:1px solid #49655c;background:linear-gradient(145deg,#173b35,#0e2625);border-radius:16px;padding:clamp(14px,3vw,29px);box-shadow:0 26px 70px rgba(0,0,0,.16)}
+.journey-toolbar{display:flex;gap:9px;flex-wrap:wrap;margin:0 0 18px;align-items:center}
+.journey-filter{color:#d6e4dd;border:1px solid #55766a;background:transparent;border-radius:50px;padding:9px 15px;font:600 .83rem inherit;font-family:inherit;cursor:pointer;transition:.2s}
+.journey-filter[aria-pressed="true"]{background:#dfac87;color:#142724;border-color:#dfac87}
+.journey-filter:focus-visible,.journey-node:focus-visible,.journey-controls button:focus-visible,.journey-list button:focus-visible{outline:3px solid #edb58e;outline-offset:4px}
+.journey-stage{display:grid;grid-template-columns:minmax(0,1.52fr) minmax(280px,1fr);gap:22px;align-items:stretch}
+.journey-map{position:relative;min-height:530px;border:1px solid #3e5a52;background:radial-gradient(ellipse at center,#22453d 0,#132f2b 68%,#112825 100%);border-radius:11px;overflow:hidden}
+.journey-map svg{display:block;width:100%;height:100%;position:absolute;inset:0}
+.journey-path{fill:none;stroke:#85ae9e;stroke-width:2.3;opacity:.66;stroke-dasharray:5 8;animation:journeydash 36s linear infinite}
+.journey-path-secondary{fill:none;stroke:#c5997b;stroke-width:1.3;opacity:.5}
+.journey-contour{fill:none;stroke:#9bc4ad;stroke-width:1;opacity:.15}
+.journey-map-title{position:absolute;top:23px;left:24px;font-size:.67rem;letter-spacing:.17em;color:#b7d3c5;text-transform:uppercase;pointer-events:none}
+.journey-map-caption{position:absolute;bottom:18px;left:20px;right:20px;font-size:.7rem;letter-spacing:.08em;color:#9cbfb0;pointer-events:none;text-transform:uppercase}
+.journey-node{--dot:#a9c9b8;position:absolute;left:calc(var(--x)*1%);top:calc(var(--y)*1%);transform:translate(-50%,-50%);width:34px;height:34px;display:flex;align-items:center;justify-content:center;border-radius:50%;border:1px solid #7fa697;background:#1a3831;cursor:pointer;color:#f8f5ea;font-family:inherit;transition:transform .2s,opacity .2s,box-shadow .2s;box-shadow:0 0 0 7px rgba(132,181,157,.09);padding:0}
+.journey-node span{display:block;height:9px;width:9px;background:var(--dot);border-radius:50%;pointer-events:none}
+.journey-node[data-theme="place"]{--dot:#b1cfbb}.journey-node[data-theme="career"]{--dot:#e0a47f}.journey-node[data-theme="people"]{--dot:#f5c66c}.journey-node[data-theme="creative"]{--dot:#91c9d0}
+.journey-node:hover{transform:translate(-50%,-50%) scale(1.18);box-shadow:0 0 0 12px rgba(132,181,157,.13)}
+.journey-node.is-selected{background:#dfaa86;border-color:#fff4d9;box-shadow:0 0 0 10px rgba(223,170,134,.19),0 0 25px rgba(223,170,134,.25);transform:translate(-50%,-50%) scale(1.23)}
+.journey-node.is-selected span{background:#19332b}
+.journey-node.is-muted{opacity:.18}
+.journey-node:after{content:attr(data-short);position:absolute;top:33px;left:50%;transform:translateX(-50%);font:600 .65rem/1.2 system-ui,sans-serif;letter-spacing:.02em;white-space:nowrap;color:#dcece3;pointer-events:none;text-shadow:0 2px 5px #0e2824}
+.journey-node.is-selected:after{color:#f3c49e}
+.journey-detail{border:1px solid #425e55;border-radius:11px;background:rgba(4,23,20,.35);padding:clamp(20px,3vw,30px);display:flex;flex-direction:column;min-height:530px}
+.journey-detail-top{display:flex;justify-content:space-between;gap:10px;color:#e6af8d;font-weight:700;font-size:.67rem;letter-spacing:.13em;text-transform:uppercase}
+.journey-detail h3{font-size:clamp(2rem,3.4vw,3rem);letter-spacing:-.055em;line-height:1.13;color:#fcf7ec;margin:30px 0 12px}
+.journey-detail p{font-size:1rem;line-height:1.75;color:#d1e0d6;margin:0 0 20px}
+.journey-detail .journey-place{color:#b1d2bf;font-size:.8rem;letter-spacing:.05em;margin-bottom:18px}
+.journey-takeaway{margin-top:auto;padding:17px 0 17px;border-top:1px solid #43665c;color:#e9c19e;font:italic 1.12rem/1.5 Georgia,serif}
+.journey-controls{display:flex;align-items:center;justify-content:space-between;gap:10px;border-top:1px solid #405f54;padding-top:17px}
+.journey-controls button{background:transparent;border:1px solid #74988a;color:#e8f3ed;padding:9px 13px;border-radius:7px;font:600 .8rem system-ui,sans-serif;cursor:pointer}
+.journey-count{color:#9cb7aa;font-size:.78rem}
+.journey-list{display:flex;gap:8px;overflow-x:auto;padding:20px 2px 3px;scrollbar-color:#7fa696 transparent}
+.journey-list button{flex:0 0 auto;border:1px solid #426158;background:#173731;color:#cfddd4;padding:10px 13px;border-radius:6px;font:600 .79rem system-ui,sans-serif;cursor:pointer}
+.journey-list button[aria-current="true"]{border-color:#d9a17e;color:#ffe1c8;background:#2c4239}
+.journey-foot{color:#a8c0b3;font-size:.79rem;margin:20px 0 0;line-height:1.6}
+@keyframes journeydash{to{stroke-dashoffset:-520}}
+@media(max-width:780px){.journey-heading{grid-template-columns:1fr}.journey-stage{grid-template-columns:1fr}.journey-map{min-height:390px}.journey-detail{min-height:345px}.journey-detail h3{margin:17px 0 10px}.journey-node{width:30px;height:30px}.journey-node:after{font-size:.58rem}.journey-map-title{font-size:.59rem}.journey-experience{padding:66px 0}}
+@media(max-width:420px){.journey-map{min-height:340px}.journey-node:after{display:none}.journey-toolbar{gap:6px}.journey-filter{padding:8px 10px;font-size:.74rem}}
+@media(prefers-reduced-motion:reduce){.journey-path{animation:none}.journey-node{transition:none}}
+
+/* V7.1: richer editorial chapter cards, without misrepresenting art as documentary photographs */
+.journey-heading-art{display:flex;align-items:center;gap:14px;margin-top:16px;max-width:490px;border-top:1px solid #42665b;padding-top:14px}
+.journey-heading-art img{width:85px;height:60px;object-fit:cover;border-radius:5px;border:1px solid #557c6c}
+.journey-heading-art span{font-size:.76rem;line-height:1.55;color:#bfd2c8}
+.journey-media{position:relative;margin:0 0 16px;border:1px solid #44685d;border-radius:9px;overflow:hidden;background:radial-gradient(circle at 24% 30%,#2b5547,#132d29);min-height:105px}
+.journey-media [hidden]{display:none!important}.journey-media img{width:100%;height:clamp(155px,18vw,205px);object-fit:cover;display:block;transition:transform .45s ease}
+.journey-media:hover img{transform:scale(1.025)}
+.journey-media figcaption{padding:10px 12px;font-size:.68rem;line-height:1.55;color:#bfd1c5;background:#17332e}
+.journey-missing-art{min-height:118px;display:flex;justify-content:center;flex-direction:column;gap:10px;padding:17px;background:radial-gradient(circle at 75% 20%,#285144,#142e2b)}
+.journey-missing-art strong{font:italic 1.2rem/1.25 Georgia,serif;color:#e9c3a3}
+.journey-missing-art span{font-size:.7rem;letter-spacing:.12em;color:#b7d0c3;text-transform:uppercase}
+.journey-story{border-left:2px solid #dcaa86;padding:0 0 0 14px;margin:3px 0 18px;font-size:.89rem;line-height:1.63;color:#e4ece5}
+.journey-story-label{display:block;color:#e4aa88;font-size:.66rem;text-transform:uppercase;letter-spacing:.16em;font-weight:700;margin-bottom:8px}
+.journey-deep-link{display:inline-flex;align-self:flex-start;max-width:100%;margin:0 0 16px;color:#1a3028;background:#e6b18e;padding:10px 14px;border-radius:6px;text-decoration:none;font-size:.78rem;font-weight:750}
+.journey-deep-link:focus-visible{outline:3px solid white;outline-offset:3px}
+.journey-deep-link[hidden],.journey-story[hidden]{display:none}
+.journey-detail{min-height:590px}
+.journey-detail h3{margin:19px 0 10px}
+.journey-detail p{margin-bottom:12px;font-size:.94rem;line-height:1.6}
+.journey-takeaway{padding:13px 0;margin-top:auto}
+.journey-featured{font-size:.7rem;letter-spacing:.12em;color:#e9b690;text-transform:uppercase;font-weight:700}
+@media(min-width:1150px){.journey-stage{grid-template-columns:minmax(0,1.3fr) minmax(320px,1fr)}}
+@media(max-width:780px){.journey-detail{min-height:0}.journey-heading-art img{width:70px;height:55px}.journey-media img{height:180px}}
+@media(prefers-reduced-motion:reduce){.journey-media img{transition:none}}
+
+</style></head><body><a class="back" href="index.html">← Full portfolio</a><section aria-labelledby="journey-title" class="journey-experience" id="journey">
+<div class="journey-wrap">
+<div class="journey-heading">
+<div><div class="journey-kicker">An interactive personal atlas / 01–19</div><h2 id="journey-title">Watch me on<br/><em>my journey.</em></h2></div>
+<p>From Minnesota and Syracuse to Singapore, Sydney, Melbourne, and the teams and communities along the way. Select a point—or follow the route—to discover what shaped me.</p>
+<span class="journey-heading-art"><img alt="Original hand-drawn city artwork" src="assets/art-86d27bb3f172.webp" loading="lazy"><span>Original art accompanies selected chapters. These are my drawings and paintings—not archival travel or workplace photographs.</span></span>
+</div>
+<div class="journey-explorer">
+<div aria-label="Filter journey chapters" class="journey-toolbar" role="group">
+<button aria-pressed="true" class="journey-filter" data-filter="all" type="button">All chapters</button>
+<button aria-pressed="false" class="journey-filter" data-filter="place" type="button">Places &amp; learning</button>
+<button aria-pressed="false" class="journey-filter" data-filter="career" type="button">Career &amp; technology</button>
+<button aria-pressed="false" class="journey-filter" data-filter="people" type="button">People &amp; purpose</button>
+<button aria-pressed="false" class="journey-filter" data-filter="creative" type="button">Independent work</button>
+</div>
+<div class="journey-stage">
+<div aria-label="Interactive journey constellation; choose a labeled milestone" class="journey-map" id="journey-map" role="group">
+<span class="journey-map-title">FIG. 02 / A LIFE IN CONNECTIONS</span>
+<svg aria-hidden="true" preserveaspectratio="none" viewbox="0 0 1000 720" xmlns="http://www.w3.org/2000/svg">
+<path class="journey-contour" d="M-100 450 Q240 50 500 360 T1080 180M-70 650Q300 160 520 600T1150 440M0 130Q340 -80 600 160T1090 80"></path>
+<path class="journey-path" d="M125 115 L270 80 L395 160 L540 75 L705 130 L830 245 L675 280 L515 240 L360 330 L215 350 L115 470 L270 560 L430 505 L590 600 L760 520 L855 620 L685 665 L465 650 L325 615"></path>
+<path class="journey-path-secondary" d="M125 115L215 350L430 505L675 280L855 620M270 80L515 240L760 520L465 650M395 160L360 330L590 600L685 665"></path>
+<circle cx="510" cy="357" fill="none" r="210" stroke="#87ad9b" stroke-opacity=".08"></circle><circle cx="510" cy="357" fill="none" r="310" stroke="#87ad9b" stroke-opacity=".06"></circle>
+</svg>
+<span class="journey-map-caption">Not a geographic route · a map of connections</span>
+</div>
+<article aria-atomic="true" aria-live="polite" class="journey-detail">
+<div class="journey-detail-top"><span id="journey-era">ORIGINS</span><span id="journey-date">THE BEGINNING</span></div>
+<h3 id="journey-event-title">Born in Minnesota.</h3>
+<div class="journey-place" id="journey-location">Minnesota → Syracuse, New York</div><figure class="journey-media" id="journey-media"><div class="journey-missing-art" id="journey-visual-fallback"><span>From the archive / chapter</span><strong id="journey-placeholder">The story behind the milestone.</strong></div><img id="journey-photo" alt="" loading="lazy" hidden><figcaption id="journey-photo-caption" hidden></figcaption></figure><div class="journey-story" id="journey-story" hidden><span class="journey-story-label">Behind the milestone</span><span id="journey-story-text"></span></div><a class="journey-deep-link" id="journey-link" target="_blank" rel="noopener noreferrer" hidden>Explore this chapter ↗</a>
+<p id="journey-description">One starting point, many directions. Growing up in Syracuse and spending summers abroad made different places and perspectives part of my everyday story.</p>
+<div class="journey-takeaway" id="journey-insight">Curiosity started long before my career did.</div>
+<div class="journey-controls"><button aria-label="Previous chapter" id="journey-prev" type="button">← Previous</button><span class="journey-count" id="journey-count">01 / 19</span><button aria-label="Next chapter" id="journey-next" type="button">Next →</button></div>
+</article>
+</div>
+<div aria-label="Journey chapter shortcuts" class="journey-list" id="journey-list"></div>
+<p class="journey-foot">A personal timeline, not a geography map. Some moments are grouped for readability; selected dates and impact figures are intentionally broad where the public record has not been reconciled. Explore the links in selected work for the projects themselves.</p>
+</div>
+</div>
+</section><script>
+(() => {
+ const moments = [
+  {y:16,x:12,short:'Origins',date:'THE BEGINNING',era:'ORIGINS',title:'Born in Minnesota.',location:'Minnesota → Syracuse, New York',category:'place',description:'I was born in Minnesota and grew up in Syracuse. The early story was never only about one place.',insight:'Curiosity started long before my career did.'},
+  {y:11,x:27,short:'Syracuse',date:'GROWING UP',era:'ORIGINS',title:'A Syracuse upbringing.',location:'Syracuse, New York',category:'place',description:'Syracuse was home growing up. Basketball, community, and school would become recurring threads in what came next.',insight:'Where you begin stays with you.'},
+  {y:22,x:40,short:'Summers abroad',date:'EARLY YEARS',era:'GLOBAL PERSPECTIVE',title:'Summers on the other side of the world.',location:'Singapore · Sri Lanka · South Korea',category:'place',description:'Summers in Singapore, Sri Lanka, and South Korea helped make travel and cross-cultural experiences a lasting part of my life. Over time I have traveled to more than 30 countries.',insight:'There is always more than one way to see a problem.'},
+  {y:10,x:54,short:'SU',date:'2009–2013',era:'EDUCATION',title:'Syracuse University.',location:'Syracuse, New York',category:'place',description:'Studied accounting, finance, and marketing at Syracuse University, while finding my way into the world of college basketball.',insight:'The disciplines were different; the curiosity was the same.'},
+  {y:18,x:71,short:'IBM',date:'2011',era:'FIRST GLOBAL WORK',title:'IBM internship in Singapore.',location:'Singapore',category:'career',description:'An IBM internship brought professional experience into the international environments that already felt familiar from summers abroad.',insight:'Experience has a way of connecting distant chapters.'},
+  {y:34,x:83,short:'Sydney',date:'2012',era:'STUDY ABROAD',title:'A semester in Sydney.',location:'Sydney, Australia',category:'place',description:'Studied abroad in Sydney. Australia would later become part of my professional life, too.',insight:'Sometimes a place appears twice in the story.'},
+  {y:39,x:68,short:'Graduate',date:'2013',era:'EDUCATION',title:'Graduated—and started moving.',location:'Syracuse → Kansas City',category:'place',description:'Graduated with studies in accounting, finance, and marketing. Bought a Hyundai Elantra and headed to Kansas City for the first job after college.',insight:'A car, a direction, and a lot to learn.'},
+  {y:33,x:52,short:'State Street',date:'2013',era:'CAREER',title:'Learning the fundamentals at State Street.',location:'Kansas City, Missouri',category:'career',description:'Worked as a fund accountant at State Street. A first professional chapter in financial services—and a chance to learn how accuracy and operations fit together.',insight:'Learning the details changes how you see the whole.'},
+  {y:46,x:36,short:'CPA firm',date:'2014–2015',era:'CAREER',title:'Audit and tax at Emerick & Company.',location:'Kansas City area',category:'career',description:'Moved into public accounting, working across audit and tax. The work sharpened my understanding of evidence, judgment, and financial processes.',insight:'Ask what the numbers really mean.'},
+  {y:49,x:22,short:'KPMG',date:'2015–2020',era:'CAREER',title:'The technology-risk chapter begins.',location:'United States · Australia',category:'career',description:'Joined KPMG in technology risk and assurance. The work broadened across financial services, telecommunications, IT audit, and technical systems. My exact promotion timing remains under reconciliation.',insight:'From assessing transactions to understanding the systems behind them.'},
+  {y:65,x:12,short:'Family',date:'2016',era:'LIFE',title:'Married in 2016.',location:'A new family chapter',category:'people',description:'An important personal milestone that belongs in this story alongside the jobs, projects, and places.',insight:'The most meaningful journeys are shared.'},
+  {y:78,x:27,short:'Basketball',date:'2014–2018',era:'COMMUNITY',title:'Coaching at Grandview.',location:'Grandview High School',category:'people',description:'Volunteered as a basketball coach and mentor and was part of a state-championship program. The interest in player development and teamwork continued into later scouting projects.',insight:'The best teams are built around what each person brings.'},
+  {y:70,x:43,short:'Melbourne',date:'2018',era:'GLOBAL CAREER',title:'Working in Melbourne.',location:'Melbourne, Australia',category:'career',description:'Returned to Australia professionally. My KPMG work expanded into cloud services, DevOps, and engineering-oriented technology assurance.',insight:'Build bridges between disciplines.'},
+  {y:83,x:59,short:'Cincinnati',date:'2020',era:'NEW CHAPTER',title:'Back to Cincinnati.',location:'Cincinnati, Ohio',category:'place',description:'Relocated to the Cincinnati area, entering another chapter that combined professional growth with family life.',insight:'Every move changes the map.'},
+  {y:72,x:77,short:'Capital One',date:'2020s',era:'TECHNOLOGY LEADERSHIP',title:'Capital One: complex systems and accountability.',location:'Commercial Banking · Technology Audit',category:'career',description:'Worked in Commercial Banking technology audit, including cybersecurity remediation, cloud, and three-lines-of-defense perspectives. The exact employment end date remains unresolved in career records.',insight:'Accountability requires understanding how systems actually operate.'},
+  {y:86,x:86,short:'Grubhub',date:'2022–2025',era:'BUILDING A FUNCTION',title:'Grubhub: from risk to operating capability.',location:'Grubhub / Just Eat Takeaway',category:'career',description:'Helped establish and lead North American GRC capabilities, connecting data, security, product delivery, and executive risk reporting. Worked with teams to build practical governance programs.',insight:'Make governance useful to the people doing the work.'},
+  {y:92,x:69,short:'Talent network',date:'2025',era:'PEOPLE & PURPOSE',title:'A layoff became a community project.',location:'Ex-Grubhub Talent Network',category:'people',description:'After layoffs, built a tracker, network, and practical resources to support displaced colleagues. The Layoff Audit and the layoff playbook extended the work into storytelling and shared learning.',insight:'The best systems help real people.'},
+  {y:90,x:47,short:'Braze',date:'2025–PRESENT',era:'ENGINEERING & AI',title:'Braze: asking harder technology questions.',location:'Braze · Technology Audit',category:'career',description:'My current work spans technology assurance, cloud infrastructure, AI-enabled software delivery, data governance, and SOX—evaluating how engineering decisions are made, enforced, and evidenced.',insight:'Better questions. Stronger decisions.'},
+  {y:85,x:33,short:'Build & tell',date:'NOW',era:'INDEPENDENT WORK',title:'Building, drawing, and telling stories.',location:'Field Guides · Dashboards · Basketball · Podcasts · Art',category:'creative',description:'Alongside my work, I build interactive tools, draw and paint, analyze basketball, write, and tell stories. This site brings those threads together.',insight:'Not every project needs a business case.'}
+ ];
+ const chapterArt = {0:{src:'assets/art-86d27bb3f172.webp',caption:'Original city painting — an artistic accompaniment, not a photograph of Minnesota.'},2:{src:'assets/art-07c8120b4a4c.webp',caption:'Original abstract painting — an artistic response to experiences across places, not a travel photograph.'},3:{src:'assets/art-86d27bb3f172.webp',caption:'Original city painting — from my artwork, not a Syracuse University photograph.'},6:{src:'assets/art-d96e5bc0bc37.webp',caption:'Original hallway sketch — a visual transition, not a photograph of the 2013 move.'},8:{src:'assets/art-88716dd7c2ba.webp',caption:'Original architectural drawing — a creative accompaniment, not a photograph of Emerick & Company.'},10:{src:'assets/art-eee66dd56c1c.webp',caption:'Original skyline painting — an artwork, not a photograph from my wedding.'},11:{src:'assets/art-86d27bb3f172.webp',caption:'Original city painting — artwork rather than a Grandview team photograph.'},13:{src:'assets/art-88716dd7c2ba.webp',caption:'Original architectural sketch — artwork, not a photograph of Cincinnati.'},15:{src:'assets/art-eee66dd56c1c.webp',caption:'Original sunset skyline painting — artwork rather than an archival Grubhub image.'},16:{src:'assets/art-07c8120b4a4c.webp',caption:'Original abstract painting — artwork accompanying the talent network story.'},17:{src:'assets/art-d96e5bc0bc37.webp',caption:'Original hallway sketch — artwork representing ongoing exploration, not a Braze workplace photo.'},18:{src:'assets/art-7b1234fa87ad.webp',caption:'Original abstract painting — part of the Outside the Lines collection.'}};
+ const chapterStories = {1:{story:'Syracuse was where basketball became part of the story. Years later, I would return to the game as a coach and, eventually, through scouting work.',label:null,href:null},2:{story:'Singapore, Sri Lanka, and South Korea were recurring summer destinations. The 30-plus-country story did not start with a business trip; it started much earlier.',label:null,href:null},3:{story:'I studied accounting, finance, and marketing from 2009 through 2013. Away from class, I also worked with Syracuse men’s basketball as a student manager.',label:null,href:null},4:{story:'In 2011, I interned with IBM in Singapore—a first chance to connect the places I knew personally with work in a large technology organization.',label:null,href:null},6:{story:'After graduation I bought a Hyundai Elantra and drove to Kansas City for a fund-accounting job. That car belongs in the story as much as the job title does.',label:null,href:null},7:{story:'Fund accounting was my first role after college. I describe that period simply: “I learned something.” It was the start of figuring out what kind of work actually held my attention.',label:null,href:null},9:{story:'The switch to technology risk at KPMG opened a new vocabulary: cloud services, DevOps, financial services, and telecommunications. The exact early promotion timeline still needs reconciliation.',label:null,href:null},11:{story:'Coaching at Grandview was not a sideline on a résumé. I cared about the work of building a team, and I was part of a state-championship program. That interest now continues in a basketball scouting project.',label:'View the basketball dossier',href:'https://irvinthev.github.io/BasketballAgent_J2/'},12:{story:'Sydney was a student chapter in 2012. Melbourne became a professional chapter in 2018, where engineering, DevOps, and cloud-service questions became more central to the work.',label:null,href:null},14:{story:'At Capital One I worked on Commercial Banking technology audit and cybersecurity remediation. I learned to examine not only whether a control existed, but how accountability held across systems and teams.',label:null,href:null},15:{story:'At Grubhub I moved beyond reviewing programs into helping build a North American GRC function. Product, security, data, and finance teams needed risk decisions to fit how their organizations actually worked.',label:null,href:null},16:{story:'When colleagues were laid off, I built a tracker, helped organize a network, and created tools to make introductions and job searches easier. That effort became The Layoff Audit and a layoff playbook. Hiring outcomes belong to the network and employers—not to one person.',label:'Read the public story',href:'https://www.businessinsider.com/irvin-thevaranjan-supports-grubhub-layoffs-recovery-efforts-2026-9'},17:{story:'At Braze, my technology assurance work now examines cloud, identity, data, software delivery, and AI-enabled engineering—where evidence, decision authority, and practical safeguards meet.',label:'Explore the AI-SDLC project',href:'https://github.com/irvinthev/pr-approval-playground-public'},18:{story:'I draw cities, buildings, interiors, mountains, and abstractions. I also build software experiments, write, record conversations, and analyze basketball. Some things are useful because they are interesting, not because they meet a business objective.',label:'Explore Outside the Lines',href:'#outside-the-lines'}};
+ const map=document.getElementById('journey-map'), list=document.getElementById('journey-list');
+ if(!map||!list) return;
+ const fields={era:document.getElementById('journey-era'),date:document.getElementById('journey-date'),title:document.getElementById('journey-event-title'),location:document.getElementById('journey-location'),description:document.getElementById('journey-description'),insight:document.getElementById('journey-insight'),count:document.getElementById('journey-count')};
+ let active=0,filter='all'; const buttons=[],shortcuts=[];
+ moments.forEach((m,i)=>{
+  const node=document.createElement('button');node.type='button';node.className='journey-node';node.dataset.theme=m.category;node.dataset.short=m.short;node.style.setProperty('--x',m.x);node.style.setProperty('--y',m.y);node.setAttribute('aria-label',`${m.date}: ${m.title}`);node.title=`${m.date} · ${m.title}`;node.innerHTML='<span aria-hidden="true"></span>';node.addEventListener('click',()=>select(i));map.appendChild(node);buttons.push(node);
+  const b=document.createElement('button');b.type='button';b.textContent=`${m.date} · ${m.short}`;b.addEventListener('click',()=>select(i));list.appendChild(b);shortcuts.push(b);
+ });
+ function visible(){return moments.map((m,i)=>i).filter(i=>filter==='all'||moments[i].category===filter)}
+ function select(index){const v=visible();if(!v.includes(index)){filter='all';updateFilters()};active=index;const m=moments[active];fields.era.textContent=m.era;fields.date.textContent=m.date;fields.title.textContent=m.title;fields.location.textContent=m.location;fields.description.textContent=m.description;fields.insight.textContent=m.insight;fields.count.textContent=`${String(active+1).padStart(2,'0')} / ${moments.length}`;const media=chapterArt[active]; const frame=document.getElementById('journey-media');const photo=document.getElementById('journey-photo');const caption=document.getElementById('journey-photo-caption');const fallback=document.getElementById('journey-visual-fallback');const placeholder=document.getElementById('journey-placeholder');if(media){photo.src=media.src;photo.alt='An original artwork from my personal collection, accompanying this chapter';photo.hidden=false;caption.textContent=media.caption;caption.hidden=false;fallback.hidden=true;}else{photo.removeAttribute('src');photo.hidden=true;caption.hidden=true;fallback.hidden=false;placeholder.textContent=m.short+' / '+m.era.toLowerCase();}const extra=chapterStories[active];const story=document.getElementById('journey-story');const storyText=document.getElementById('journey-story-text');const deep=document.getElementById('journey-link');if(extra){storyText.textContent=extra.story;story.hidden=false;if(extra.href){deep.href=extra.href==='#outside-the-lines'?'index.html#art-gallery':extra.href;deep.textContent=extra.label+' ↗';deep.hidden=false}else{deep.hidden=true;deep.removeAttribute('href')}}else{story.hidden=true;deep.hidden=true;deep.removeAttribute('href')} buttons.forEach((b,i)=>{b.classList.toggle('is-selected',i===active);b.setAttribute('aria-pressed',String(i===active))});shortcuts.forEach((b,i)=>b.setAttribute('aria-current',i===active?'true':'false')); if(!window.matchMedia('(prefers-reduced-motion: reduce)').matches){shortcuts[active].scrollIntoView({block:'nearest',inline:'nearest',behavior:'smooth'})}}
+ function updateFilters(){document.querySelectorAll('.journey-filter').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.filter===filter)));buttons.forEach((b,i)=>{let ok=filter==='all'||moments[i].category===filter;b.classList.toggle('is-muted',!ok);b.disabled=!ok});shortcuts.forEach((b,i)=>{b.hidden=!(filter==='all'||moments[i].category===filter)})}
+ document.querySelectorAll('.journey-filter').forEach(b=>b.addEventListener('click',()=>{filter=b.dataset.filter;updateFilters();if(!visible().includes(active))select(visible()[0]);else select(active)}));
+ function move(dir){const v=visible(),pos=v.indexOf(active);select(v[(pos+dir+v.length)%v.length])}
+ document.getElementById('journey-prev').addEventListener('click',()=>move(-1));document.getElementById('journey-next').addEventListener('click',()=>move(1));
+ map.addEventListener('keydown',(e)=>{if(e.key==='ArrowRight'||e.key==='ArrowDown'){e.preventDefault();move(1);buttons[active].focus()}else if(e.key==='ArrowLeft'||e.key==='ArrowUp'){e.preventDefault();move(-1);buttons[active].focus()}});
+ updateFilters();select(0);
+})();
+</script></body></html>
